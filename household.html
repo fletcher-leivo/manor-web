@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leivo Manor — Household</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg-main:        #2a2d32;
+            --color-bg-sidebar:     #1e2024;
+            --color-bg-hover:       #363a40;
+            --color-accent-gold:    #c9a96e;
+            --color-accent-sage:    #7a8b7a;
+            --color-text-primary:   #e0e0e0;
+            --color-text-secondary: #b0b3b8;
+            --color-text-muted:     #6b6e73;
+            --color-border:         #363a40;
+
+            --spacing-xs:  0.25rem;
+            --spacing-sm:  0.5rem;
+            --spacing-md:  0.75rem;
+            --spacing-lg:  1rem;
+            --spacing-xl:  0.5rem;
+            --spacing-2xl: 2rem;
+            --spacing-3xl: 3rem;
+            --spacing-4xl: 4rem;
+
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 12px;
+
+            --shadow-subtle: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-medium: 0 4px 12px rgba(0,0,0,0.5);
+
+            --duration-normal: 200ms;
+            --easing-default:  cubic-bezier(0.4, 0, 0.2, 1);
+
+            --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+            --font-size-xs:  0.75rem;
+            --font-size-sm:  0.875rem;
+            --font-size-md:  1rem;
+            --font-size-lg:  1.25rem;
+            --font-size-xl:  1.5rem;
+            --font-size-2xl: 2rem;
+            --font-weight-normal:   400;
+            --font-weight-medium:   500;
+            --font-weight-semibold: 600;
+            --line-height-tight: 1.25;
+            --line-height-normal: 1.5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-normal);
+            line-height: var(--line-height-normal);
+            color: var(--color-text-primary);
+            background: var(--color-bg-main);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a4e54; }
+
+        .page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-3xl) var(--spacing-lg);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: var(--spacing-4xl);
+        }
+
+        .logo {
+            max-width: 160px;
+            height: auto;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        h1 {
+            color: var(--color-accent-gold);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+            line-height: var(--line-height-tight);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-md);
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-block;
+            margin-bottom: var(--spacing-2xl);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: color var(--duration-normal) var(--easing-default);
+        }
+        .back-link:hover {
+            color: var(--color-accent-gold);
+        }
+
+        /* =========================================
+           ORG CHART STRUCTURE
+           ========================================= */
+
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Tier rows */
+        .tier {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xl);
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        /* Staff card */
+        .card {
+            background: var(--color-bg-main);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md) var(--spacing-md);
+            box-shadow: var(--shadow-subtle);
+            text-align: center;
+            min-width: 120px;
+            max-width: 150px;
+            transition: background var(--duration-normal) var(--easing-default),
+                        border-color var(--duration-normal) var(--easing-default),
+                        box-shadow var(--duration-normal) var(--easing-default),
+                        transform var(--duration-normal) var(--easing-default);
+            cursor: default;
+        }
+
+        .card:hover {
+            background: var(--color-bg-hover);
+            border-color: var(--color-accent-gold);
+            box-shadow: var(--shadow-medium), 0 0 8px rgba(201, 169, 110, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-name {
+            color: var(--color-accent-gold);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-semibold);
+            line-height: var(--line-height-tight);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .card-title {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .card-role {
+            color: var(--color-accent-sage);
+            font-size: var(--font-size-xs);
+            line-height: var(--line-height-normal);
+        }
+
+        /* Tier 1 - Steward card (wider) */
+        .card-steward {
+            min-width: 260px;
+            max-width: 320px;
+        }
+
+        .card-steward .card-name {
+            font-size: var(--font-size-lg);
+        }
+
+        /* Pemberton & Ashworth paired card */
+        .card-pair {
+            min-width: 220px;
+            max-width: 260px;
+            text-align: left;
+            padding: var(--spacing-md);
+        }
+
+        .pair-container {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: stretch;
+        }
+
+        .pair-member {
+            flex: 1;
+            text-align: center;
+            padding: var(--spacing-sm);
+        }
+
+        .pair-member .card-name {
+            font-size: var(--font-size-sm);
+        }
+
+        .pair-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            color: var(--color-accent-gold);
+            font-size: var(--font-size-xs);
+            position: relative;
+        }
+
+        .pair-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-accent-gold);
+        }
+
+        .pair-link-icon {
+            background: var(--color-bg-main);
+            padding: var(--spacing-xs);
+            z-index: 1;
+            font-size: 0.65rem;
+            color: var(--color-accent-gold);
+        }
+
+        .pair-header {
+            text-align: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .pair-header .card-name {
+            font-size: var(--font-size-sm);
+            color: var(--color-accent-gold);
+        }
+
+        .pair-header .card-title {
+            font-size: var(--font-size-xs);
+            color: var(--color-accent-sage);
+            margin-bottom: 0;
+        }
+
+        /* =========================================
+           CONNECTING LINES (CSS-drawn, gold)
+           =========================================
+
+           Architecture:
+           Tier 1 card → vertical connector → horizontal bus →
+           Tier 2: each card is wrapped in a .col (flex column) so
+           Fletcher's tall sub-tree doesn't affect sibling alignment.
+           ========================================= */
+
+        .connector-v {
+            width: 2px;
+            height: 40px;
+            background: var(--color-accent-gold);
+        }
+
+        /* Horizontal bus line for Tier 2 */
+        .bus-row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .bus {
+            height: 2px;
+            background: var(--color-accent-gold);
+        }
+
+        /* Tier 2 wrapper: each card in its own column */
+        .tier-columns {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xl);
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .tier-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Drop line from bus to each Tier 2 column */
+        .drop {
+            width: 2px;
+            height: 48px;
+            background: var(--color-accent-gold);
+        }
+
+        /* Sub-connector: from Fletcher card down to Apprentices */
+        .sub-connector-v {
+            width: 2px;
+            height: 32px;
+            background: var(--color-accent-gold);
+        }
+
+        .sub-bus-row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .sub-bus-line {
+            height: 2px;
+            background: var(--color-accent-gold);
+        }
+
+        .sub-drop {
+            width: 2px;
+            height: 20px;
+            background: var(--color-accent-gold);
+        }
+
+        .sub-drops {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+
+        .sub-drops .tier-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* =========================================
+           ON LEAVE SECTION
+           ========================================= */
+
+        .on-leave {
+            margin-top: var(--spacing-4xl);
+            opacity: 0.4;
+            border-top: 1px solid var(--color-border);
+            padding-top: var(--spacing-2xl);
+        }
+
+        .on-leave-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .on-leave-header h2 {
+            color: var(--color-text-muted);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .on-leave-header .tag {
+            display: inline-block;
+            background: var(--color-bg-hover);
+            color: var(--color-text-muted);
+            font-size: var(--font-size-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .on-leave .tier {
+            gap: var(--spacing-md);
+        }
+
+        .on-leave .card {
+            min-width: 150px;
+            max-width: 180px;
+            border-style: dashed;
+        }
+
+        .on-leave .card:hover {
+            opacity: 1;
+            border-style: solid;
+        }
+
+        .on-leave .card-name {
+            color: var(--color-text-muted);
+            text-decoration: line-through;
+            text-decoration-color: var(--color-text-muted);
+        }
+
+        .on-leave .card-title {
+            color: var(--color-text-muted);
+        }
+
+        .on-leave .card-role {
+            color: var(--color-text-muted);
+        }
+
+        /* =========================================
+           RESPONSIVE
+           ========================================= */
+
+        @media (max-width: 768px) {
+            .page {
+                padding: var(--spacing-xl) var(--spacing-md);
+            }
+
+            .tier, .tier-columns, .sub-drops {
+                gap: var(--spacing-md);
+            }
+
+            .card {
+                min-width: 140px;
+                max-width: 180px;
+                padding: var(--spacing-md) var(--spacing-lg);
+            }
+
+            .card-steward {
+                min-width: 200px;
+            }
+
+            .card-pair {
+                min-width: 280px;
+                max-width: 100%;
+            }
+
+            .connector-v {
+                height: 24px;
+            }
+
+            .drop {
+                height: 16px;
+            }
+
+            h1 {
+                font-size: var(--font-size-xl);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pair-container {
+                flex-direction: column;
+            }
+
+            .pair-link {
+                transform: rotate(90deg);
+                min-width: 28px;
+                min-height: 28px;
+            }
+
+            .card-pair {
+                min-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <a href="/index.html" class="back-link">&larr; Back to Services</a>
+        <header>
+            <img src="/assets/leivo-manor-logo.png" alt="Leivo Manor" class="logo">
+            <h1>The Household</h1>
+            <p class="subtitle">Manor staff organisation chart</p>
+        </header>
+
+        <div class="org-chart">
+
+            <!-- TIER 1: Steward -->
+            <div class="tier tier-1">
+                <div class="card card-steward">
+                    <div class="card-name">Jaxon</div>
+                    <div class="card-title">Steward, Head of Staff</div>
+                    <div class="card-role">Task routing &bull; Delegation &bull; Validation &bull; Household coordination</div>
+                </div>
+            </div>
+
+            <!-- Connector: Tier 1 to bus -->
+            <div class="connector-v"></div>
+
+            <!-- Bus row: horizontal line spanning Tier 2 -->
+            <div class="bus-row">
+                <div class="bus" id="bus-tier2"></div>
+            </div>
+
+            <!-- TIER 2: Each card in its own column (with drop line from bus) -->
+            <div class="tier-columns" id="tier-2">
+                <!-- Fletcher (with sub-tree for apprentices) -->
+                <div class="tier-col">
+                    <div class="drop"></div>
+                    <div class="card">
+                        <div class="card-name">Fletcher</div>
+                        <div class="card-title">Craftsman / Builder</div>
+                        <div class="card-role">Code &bull; Scripts &bull; Tooling &bull; Implementation</div>
+                    </div>
+                    <!-- Sub-connector to apprentices -->
+                    <div class="sub-connector-v"></div>
+                    <div class="sub-bus-row">
+                        <div class="sub-bus-line" id="sub-bus"></div>
+                    </div>
+                    <div class="sub-drops">
+                        <div class="tier-col">
+                            <div class="sub-drop"></div>
+                            <div class="card">
+                                <div class="card-name">Apprentice</div>
+                                <div class="card-title">Code Review</div>
+                                <div class="card-role">Quality Gate &bull; PR Reviews &bull; Code Inspection</div>
+                            </div>
+                        </div>
+                        <div class="tier-col">
+                            <div class="sub-drop"></div>
+                            <div class="card">
+                                <div class="card-name">Apprentice</div>
+                                <div class="card-title">Architecture</div>
+                                <div class="card-role">Design &bull; Planning &bull; Technical Decisions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blackwood -->
+                <div class="tier-col">
+                    <div class="drop"></div>
+                    <div class="card">
+                        <div class="card-name">Blackwood</div>
+                        <div class="card-title">Infrastructure</div>
+                        <div class="card-role">Servers &bull; Docker &bull; Networking &bull; Monitoring</div>
+                    </div>
+                </div>
+
+                <!-- Angus -->
+                <div class="tier-col">
+                    <div class="drop"></div>
+                    <div class="card">
+                        <div class="card-name">Angus</div>
+                        <div class="card-title">Whisky Keeper</div>
+                        <div class="card-role">Collection &bull; Tastings &bull; Distillery Research</div>
+                    </div>
+                </div>
+
+                <!-- Lockwood -->
+                <div class="tier-col">
+                    <div class="drop"></div>
+                    <div class="card">
+                        <div class="card-name">Lockwood</div>
+                        <div class="card-title">Security &amp; Audits</div>
+                        <div class="card-role">Investigations &bull; Incident Response &bull; OSINT</div>
+                    </div>
+                </div>
+
+                <!-- Housekeeper -->
+                <div class="tier-col">
+                    <div class="drop"></div>
+                    <div class="card">
+                        <div class="card-name">Housekeeper</div>
+                        <div class="card-title">Routine Maintenance</div>
+                        <div class="card-role">File Organisation &bull; Cleanup &bull; Upkeep</div>
+                    </div>
+                </div>
+
+                <!-- Pemberton & Ashworth (paired) -->
+                <div class="tier-col">
+                    <div class="drop"></div>
+                    <div class="card card-pair">
+                        <div class="pair-header">
+                            <div class="card-name">Pemberton &amp; Ashworth</div>
+                            <div class="card-title">Worker Pair</div>
+                        </div>
+                        <div class="pair-container">
+                            <div class="pair-member">
+                                <div class="card-name">Pemberton</div>
+                                <div class="card-title">Heavy Work</div>
+                                <div class="card-role">General-purpose tasks</div>
+                            </div>
+                            <div class="pair-link">
+                                <span class="pair-link-icon">&#8645;</span>
+                            </div>
+                            <div class="pair-member">
+                                <div class="card-name">Ashworth</div>
+                                <div class="card-title">Light Work</div>
+                                <div class="card-role">General-purpose tasks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ON LEAVE section -->
+            <div class="on-leave">
+                <div class="on-leave-header">
+                    <span class="tag">On Leave</span>
+                    <h2>Former Staff</h2>
+                </div>
+                <div class="tier">
+                    <div class="card">
+                        <div class="card-name">Coder</div>
+                        <div class="card-title">General Coding</div>
+                        <div class="card-role">Stopped</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-name">Reviewer</div>
+                        <div class="card-title">Review / Gatekeeping</div>
+                        <div class="card-role">Stopped</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-name">Security</div>
+                        <div class="card-title">Security Auditing</div>
+                        <div class="card-role">Stopped</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer style="text-align: center; color: var(--color-text-muted); margin-top: var(--spacing-4xl); font-size: var(--font-size-sm);">
+            <p>&copy; 2026 <span style="color: var(--color-accent-gold); font-weight: var(--font-weight-medium);">Blenheim Manor</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // Set the gold bus line width to span the Tier 2 columns
+        function adjustBus() {
+            var tier2 = document.getElementById('tier-2');
+            var bus = document.getElementById('bus-tier2');
+            if (!tier2 || !bus) return;
+
+            var rect = tier2.getBoundingClientRect();
+            bus.style.width = rect.width + 'px';
+        }
+
+        // Set sub-bus width for apprentices
+        function adjustSubBus() {
+            var subBus = document.getElementById('sub-bus');
+            var subDrops = document.querySelector('.sub-drops');
+            if (!subBus || !subDrops) return;
+            var rect = subDrops.getBoundingClientRect();
+            subBus.style.width = rect.width + 'px';
+        }
+
+        // Set each drop line's height to connect from bus to its card
+        function adjustDrops() {
+            var bus = document.getElementById('bus-tier2');
+            var drops = document.querySelectorAll('.drop');
+            if (!bus) return;
+            var busBottom = bus.getBoundingClientRect().bottom;
+
+            drops.forEach(function(drop) {
+                var col = drop.parentElement;
+                var card = col.querySelector('.card');
+                if (card) {
+                    var cardTop = card.getBoundingClientRect().top;
+                    drop.style.height = (cardTop - busBottom) + 'px';
+                }
+            });
+        }
+
+        function adjustAll() {
+            adjustBus();
+            adjustSubBus();
+            adjustDrops();
+        }
+
+        // Run on load and resize
+        window.addEventListener('load', adjustAll);
+        window.addEventListener('resize', adjustAll);
+
+        // Also run after fonts load (Inter may change widths)
+        document.fonts.ready.then(adjustAll);
+    </script>
+</body>
+</html>
