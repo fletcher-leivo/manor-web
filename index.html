@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
     <title>Leivo Manor — Services</title>
+    <link rel="icon" type="image/webp" href="/manor-assets/leivo-manor-icon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/webp" href="/manor-assets/leivo-manor-icon-128x128.png" sizes="128x128">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,6 +20,8 @@
             --color-text-primary:   #e0e0e0;
             --color-text-secondary: #b0b3b8;
             --color-text-muted:     #6b6e73;
+            --color-status-done:    #4a9e6a;
+            --color-status-overdue: #c75c5c;
             --color-border:         #363a40;
 
             --spacing-xs:  0.25rem;
@@ -32,23 +37,17 @@
             --radius-md: 6px;
             --radius-lg: 12px;
 
-            --spacing-xs:  0.25rem;
-            --spacing-sm:  0.5rem;
-            --spacing-md:  0.75rem;
-            --spacing-lg:  1rem;
-            --spacing-xl:  1.5rem;
-            --spacing-2xl: 2rem;
-            --spacing-3xl: 3rem;
-            --spacing-4xl: 4rem;
-
             --shadow-subtle: 0 1px 3px rgba(0,0,0,0.4);
             --shadow-medium: 0 4px 12px rgba(0,0,0,0.5);
             --shadow-strong: 0 8px 24px rgba(0,0,0,0.6);
 
+            --duration-fast:   100ms;
             --duration-normal: 200ms;
+            --duration-slow:   300ms;
             --easing-default:  cubic-bezier(0.4, 0, 0.2, 1);
 
             --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+            --font-size-xs:  0.75rem;
             --font-size-sm:  0.875rem;
             --font-size-md:  1rem;
             --font-size-lg:  1.25rem;
@@ -59,9 +58,25 @@
             --font-weight-semibold: 600;
             --line-height-tight: 1.25;
             --line-height-normal: 1.5;
+
+            --z-base:     0;
+            --z-dropdown: 100;
+            --z-sticky:   200;
+            --z-modal:    300;
+            --z-toast:    400;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        ::selection {
+            background: rgba(201, 169, 110, 0.3);
+            color: var(--color-text-primary);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a4e54; }
 
         body {
             font-family: var(--font-sans);
@@ -91,7 +106,7 @@
         }
 
         .logo {
-            max-width: 180px;
+            max-width: 160px;
             height: auto;
             margin-bottom: var(--spacing-xl);
         }
@@ -139,9 +154,27 @@
             transform: translateY(-3px);
         }
 
+        .service-card:focus-visible {
+            outline: 2px solid var(--color-accent-gold);
+            outline-offset: 2px;
+        }
+
         .service-icon {
-            font-size: 2rem;
+            color: var(--color-text-secondary);
             margin-bottom: var(--spacing-md);
+            transition: color var(--duration-normal) var(--easing-default);
+        }
+
+        .service-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke-width: 1.5;
+            fill: none;
+            stroke: currentColor;
+        }
+
+        .service-card:hover .service-icon {
+            color: var(--color-accent-gold);
         }
 
         .service-title {
@@ -174,48 +207,71 @@
             color: var(--color-accent-gold);
             font-weight: var(--font-weight-medium);
         }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .service-card {
+                transition: none;
+            }
+            .service-card:hover {
+                transform: none;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+            body {
+                padding: var(--spacing-xl) var(--spacing-md);
+            }
+            h1 {
+                font-size: var(--font-size-xl);
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <img src="/assets/leivo-manor-logo.png" alt="Leivo Manor" class="logo">
+            <img src="/manor-assets/leivo-manor-logo-compact.webp" alt="Leivo Manor" class="logo">
             <h1>Leivo Manor — Services</h1>
             <p class="subtitle">Available services on this server</p>
         </header>
         <div class="services-grid">
             <a href="http://tuvjaxonp03.openclaw.leivo:3001" class="service-card">
-                <div class="service-icon">&#128202;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 5-9"/></svg></div>
                 <div class="service-title">Grafana</div>
                 <div class="service-desc">Monitoring and analytics dashboard for visualizing metrics and logs.</div>
             </a>
             <a href="http://tuvjaxonp03.openclaw.leivo:9090" class="service-card">
-                <div class="service-icon">&#128269;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
                 <div class="service-title">Prometheus</div>
                 <div class="service-desc">Time-series database and monitoring system.</div>
             </a>
             <a href="/hermes/" class="service-card">
-                <div class="service-icon">&#129302;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
                 <div class="service-title">Hermes Dashboard</div>
                 <div class="service-desc">AI agent dashboard and management console.</div>
             </a>
             <a href="http://tuvjaxonp03.openclaw.leivo:8000" class="service-card">
-                <div class="service-icon">&#9881;&#65039;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M9.1 4.6a2 2 0 0 1 1.4-.6h3a2 2 0 0 1 1.4.6l1 1.7a2 2 0 0 1-.6 2.8l-.6.3.3 1.8a2 2 0 0 1-.6 1.9l-1.3 1.2a2 2 0 0 1-.6 1.7l.3 1.9a2 2 0 0 1-.6 1.9l-1.4 1.4"/><circle cx="12" cy="12" r="2"/></svg></div>
                 <div class="service-title">Honcho API</div>
                 <div class="service-desc">Process manager API (localhost only).</div>
             </a>
             <a href="http://tuvjaxonp03.openclaw.leivo:8080" class="service-card">
-                <div class="service-icon">&#128263;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
                 <div class="service-title">Brave Search MCP</div>
                 <div class="service-desc">Brave Search Model Context Protocol server (localhost only).</div>
             </a>
             <a href="http://tuvjaxonp03.openclaw.leivo:8090" class="service-card">
-                <div class="service-icon">&#128133;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg></div>
                 <div class="service-title">OpenOSINT</div>
                 <div class="service-desc">Open-source intelligence gathering service by Lockwood.</div>
             </a>
             <a href="/household.html" class="service-card">
-                <div class="service-icon">&#127968;</div>
+                <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .7-.9L13 1l1-1 9 8a2 2 0 0 1 .7.9 2 2 0 0 1 0 1.4l-7 14a2 2 0 0 1-1.4.7 2 2 0 0 1-1.4-.7l-3-6H7l-3 6a2 2 0 0 1-1.4.7 2 2 0 0 1-1.4-.7l-1-2"/></svg></div>
                 <div class="service-title">The Household</div>
                 <div class="service-desc">Manor household chart and staff directory.</div>
             </a>
