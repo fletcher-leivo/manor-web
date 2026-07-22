@@ -88,46 +88,56 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: var(--spacing-3xl) var(--spacing-lg);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        /* Header */
+        /* Header bar — logo absolute top-left, title centered to grid axis */
         header {
-            text-align: center;
-            margin-bottom: var(--spacing-3xl);
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 130px;
+            background: var(--color-bg-sidebar);
+            border-bottom: 1px solid var(--color-border);
         }
 
         .logo {
-            max-width: 160px;
+            position: absolute;
+            left: var(--spacing-lg);
+            top: 50%;
+            transform: translateY(-50%);
             height: auto;
-            margin-bottom: var(--spacing-xl);
+            width: 240px;
         }
 
-        h1 {
+        .header-title-wrap {
+            flex: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .header-title {
             color: var(--color-accent-gold);
             font-size: var(--font-size-2xl);
             font-weight: var(--font-weight-semibold);
             line-height: var(--line-height-tight);
-            margin-bottom: var(--spacing-sm);
         }
 
-        .subtitle {
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-md);
+        /* Centered content area */
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-2xl);
         }
 
-        /* Services grid */
+        /* Services grid — 3 columns, 2 rows */
         .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: var(--spacing-xl);
         }
 
@@ -199,7 +209,8 @@
         footer {
             text-align: center;
             color: var(--color-text-muted);
-            margin-top: var(--spacing-3xl);
+            padding: var(--spacing-xl) var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
             font-size: var(--font-size-sm);
         }
 
@@ -218,13 +229,26 @@
             }
         }
 
+        /* Tablet */
+        @media (max-width: 860px) {
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         /* Mobile */
         @media (max-width: 640px) {
-            body {
-                padding: var(--spacing-xl) var(--spacing-md);
+            header {
+                min-height: 90px;
             }
-            h1 {
-                font-size: var(--font-size-xl);
+            .logo {
+                width: 160px;
+            }
+            .header-title {
+                font-size: var(--font-size-lg);
+            }
+            .container {
+                padding: var(--spacing-xl) var(--spacing-md) var(--spacing-lg);
             }
             .services-grid {
                 grid-template-columns: 1fr;
@@ -233,12 +257,14 @@
     </style>
 </head>
 <body>
+    <header>
+        <img src="/manor-assets/leivo-manor-logo-header.webp" alt="Leivo Manor" class="logo">
+        <div class="header-title-wrap">
+            <span class="header-title">Services</span>
+        </div>
+    </header>
+
     <div class="container">
-        <header>
-            <img src="/manor-assets/leivo-manor-logo-compact.webp" alt="Leivo Manor" class="logo">
-            <h1>Leivo Manor — Services</h1>
-            <p class="subtitle">Available services on this server</p>
-        </header>
         <div class="services-grid">
             <a href="http://tuvjaxonp03.openclaw.leivo:3001" class="service-card">
                 <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 5-9"/></svg></div>
@@ -271,9 +297,10 @@
                 <div class="service-desc">Manor household chart and staff directory.</div>
             </a>
         </div>
-        <footer>
-            <p>&copy; 2026 <span class="manor">Blenheim Manor</span></p>
-        </footer>
     </div>
+
+    <footer>
+        <p>&copy; 2026 <span class="manor">Blenheim Manor</span></p>
+    </footer>
 </body>
 </html>
