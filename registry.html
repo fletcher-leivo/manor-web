@@ -451,12 +451,20 @@
             padding: var(--spacing-md) var(--spacing-lg);
             border-top: 1px solid var(--color-border);
             flex-shrink: 0;
+            /* iOS WebKit keyboard-safe fallback */
+            padding-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
         }
 
         .chat-input-row {
             display: flex;
             gap: var(--spacing-sm);
             align-items: flex-end;
+        }
+
+        /* Chat messages — dynamic height for keyboard safety */
+        .chat-messages.keyboard-active {
+            /* JS will set max-height to account for keyboard */
+            transition: max-height var(--duration-slow) var(--easing-default);
         }
 
         .chat-input {
@@ -837,17 +845,91 @@
                 }
             }, { passive: true });
 
-            // Keyboard-aware: adjust panel when virtual keyboard opens
-            let lastViewportHeight = window.innerHeight;
-            window.addEventListener('resize', function () {
-                if (!isMobile()) return;
-                const newHeight = window.innerHeight;
-                const diff = lastViewportHeight - newHeight;
-                // Virtual keyboard detected (significant height drop)
-                if (diff > 150 && chatOpen) {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
+            // Keyboard-aware: VisualViewport API (primary) + scrollIntoView fallback
+            let keyboardOpen = false;
+            let keyboardHeight = 0;
+
+            // Use VisualViewport API if available (Chrome, Edge, Firefox)
+            const viewport = typeof window.visualViewport !== 'undefined' ? window.visualViewport : null;
+
+            function handleKeyboardChange() {
+                if (!isMobile() || !chatOpen) return;
+
+                if (viewport) {
+                    // VisualViewport reports the actual visible area (excludes keyboard)
+                    keyboardHeight = window.innerHeight - viewport.height;
+                } else {
+                    // Fallback: detect via window.resize (iOS Safari doesn't always shrink)
+                    keyboardHeight = Math.max(0, lastViewportHeight - window.innerHeight);
                 }
-                lastViewportHeight = newHeight;
+
+                const isKeyboardOpen = keyboardHeight > 150;
+                if (isKeyboardOpen && !keyboardOpen) {
+                    // Keyboard just opened
+                    keyboardOpen = true;
+                    onKeyboardOpen();
+                } else if (!isKeyboardOpen && keyboardOpen) {
+                    // Keyboard just closed
+                    keyboardOpen = false;
+                    onKeyboardClose();
+                }
+            }
+
+            function onKeyboardOpen() {
+                // Shrink messages area so input stays visible above keyboard
+                // Reserve space for: input area (~80px) + keyboard + padding
+                const reserve = keyboardHeight + 80; // keyboard + input area
+                chatMessages.style.maxHeight = `calc(100vh - ${reserve}px)`;
+                chatMessages.classList.add('keyboard-active');
+                // Scroll to bottom so latest message is visible
+                requestAnimationFrame(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+            }
+
+            function onKeyboardClose() {
+                // Restore full height
+                chatMessages.style.maxHeight = '';
+                chatMessages.classList.remove('keyboard-active');
+            }
+
+            if (viewport) {
+                // VisualViewport fires 'resize' when keyboard opens/closes
+                viewport.addEventListener('resize', handleKeyboardChange);
+                // Also listen for 'scroll' in case user scrolls while keyboard is open
+                viewport.addEventListener('scroll', function () {
+                    if (keyboardOpen) {
+                        // Ensure input stays visible
+                        requestAnimationFrame(() => {
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        });
+                    }
+                });
+            } else {
+                // Fallback: window.resize (less reliable)
+                let lastViewportHeight = window.innerHeight;
+                window.addEventListener('resize', function () {
+                    if (!isMobile()) return;
+                    keyboardHeight = Math.max(0, lastViewportHeight - window.innerHeight);
+                    if (keyboardHeight > 150 && !keyboardOpen && chatOpen) {
+                        keyboardOpen = true;
+                        onKeyboardOpen();
+                    } else if (keyboardHeight <= 150 && keyboardOpen) {
+                        keyboardOpen = false;
+                        onKeyboardClose();
+                    }
+                    lastViewportHeight = window.innerHeight;
+                });
+            }
+
+            // Focus event fallback: ensure input is visible when focused
+            chatInput.addEventListener('focus', function () {
+                if (isMobile() && chatOpen) {
+                    // Small delay to let keyboard animation start
+                    setTimeout(() => {
+                        chatInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }, 100);
+                }
             });
 
             // --- Pull-to-refresh (mobile main content) ---
