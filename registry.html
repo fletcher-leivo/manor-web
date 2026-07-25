@@ -296,6 +296,16 @@
             flex-shrink: 0;
         }
 
+        /* Mobile drag handle */
+        .chat-handle {
+            display: none;
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--color-border);
+            margin: 0 auto var(--spacing-sm) auto;
+        }
+
         .chat-header-title {
             font-size: var(--font-size-md);
             font-weight: var(--font-weight-semibold);
@@ -568,9 +578,26 @@
                 padding: var(--spacing-xl) var(--spacing-md) var(--spacing-lg);
             }
 
+            /* Bottom sheet chat panel */
             .chat-panel {
+                top: auto;
+                right: 0;
+                bottom: 0;
                 width: 100%;
-                --chat-width: 100%;
+                height: 95vh;
+                border-left: none;
+                border-top: 2px solid var(--color-accent-gold);
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+                box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.6);
+                transform: translateY(100%);
+            }
+
+            .chat-panel.open {
+                transform: translateY(0);
+            }
+
+            .chat-handle {
+                display: block;
             }
 
             .chat-overlay {
@@ -579,6 +606,55 @@
 
             .container.chat-open {
                 margin-right: 0;
+            }
+
+            /* Larger touch targets on mobile */
+            .chat-toggle {
+                width: 56px;
+                height: 56px;
+                right: var(--spacing-md);
+                bottom: var(--spacing-md);
+            }
+
+            .chat-toggle svg {
+                width: 28px;
+                height: 28px;
+            }
+
+            .chat-send {
+                width: 48px;
+                height: 48px;
+            }
+
+            .chat-input {
+                min-height: 48px;
+                font-size: var(--font-size-md);
+            }
+
+            .chat-bubble {
+                max-width: 92%;
+            }
+
+            /* Keyboard-aware input area */
+            .chat-input-area {
+                padding: var(--spacing-sm) var(--spacing-md);
+                background: var(--color-bg-sidebar);
+                border-top: 1px solid var(--color-border);
+            }
+
+            /* Mobile pull-to-refresh indicator */
+            .pull-indicator {
+                display: none;
+                text-align: center;
+                padding: var(--spacing-md);
+                color: var(--color-text-muted);
+                font-size: var(--font-size-xs);
+                transition: opacity var(--duration-normal) var(--easing-default);
+            }
+
+            .pull-indicator.visible {
+                display: block;
+                opacity: 1;
             }
         }
     </style>
@@ -593,6 +669,7 @@
 
     <div class="page-wrapper">
         <div class="container" id="mainContainer">
+            <div class="pull-indicator" id="pullIndicator">Refresh...</div>
             <h2 class="section-title">Active Projects</h2>
             <div class="projects-grid">
                 <div class="project-card" tabindex="0" role="button" aria-label="Select Manor Copilot project" data-project="manor-copilot">
@@ -635,6 +712,7 @@
 
         <!-- Chat panel -->
         <aside class="chat-panel" id="chatPanel" role="complementary" aria-label="Chat panel">
+            <div class="chat-handle"></div>
             <div class="chat-header">
                 <div>
                     <div class="chat-header-title">Manor Assistant</div>
@@ -688,6 +766,7 @@
             let chatOpen = false;
             let selectedProject = '';
             let sending = false;
+            const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
 
             function toggleChat() {
                 chatOpen = !chatOpen;
@@ -695,7 +774,7 @@
                 chatToggle.classList.toggle('open', chatOpen);
                 mainContainer.classList.toggle('chat-open', chatOpen);
                 chatToggle.setAttribute('aria-expanded', chatOpen);
-                if (chatOpen) {
+                if (chatOpen && !isMobile()) {
                     chatInput.focus();
                 }
             }
@@ -719,6 +798,94 @@
                     closeChat();
                 }
             });
+
+            // --- Touch gestures (mobile) ---
+            let touchStartY = 0;
+            let touchStartX = 0;
+            let touchStartTime = 0;
+            let touchStartPanelY = null;
+
+            chatPanel.addEventListener('touchstart', function (e) {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                touchStartTime = Date.now();
+                touchStartPanelY = chatPanel.getBoundingClientRect().top;
+            }, { passive: true });
+
+            chatPanel.addEventListener('touchmove', function (e) {
+                if (!chatOpen || !isMobile()) return;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                // Only allow downward drag to dismiss
+                if (deltaY > 0 && touchStartY <= chatPanel.getBoundingClientRect().top + 50) {
+                    chatPanel.style.transform = 'translateY(' + deltaY + 'px)';
+                    chatPanel.style.transition = 'none';
+                }
+            }, { passive: true });
+
+            chatPanel.addEventListener('touchend', function (e) {
+                if (!chatOpen || !isMobile()) return;
+                chatPanel.style.transition = '';
+                const deltaY = (e.changedTouches[0] || {}).clientY - touchStartY;
+                const elapsed = Date.now() - touchStartTime;
+
+                // Swipe down > 120px or fast swipe > 60px
+                if (deltaY > 120 || (deltaY > 60 && elapsed < 300)) {
+                    chatPanel.style.transform = 'translateY(100%)';
+                    setTimeout(closeChat, 300);
+                } else {
+                    chatPanel.style.transform = '';
+                }
+            }, { passive: true });
+
+            // Keyboard-aware: adjust panel when virtual keyboard opens
+            let lastViewportHeight = window.innerHeight;
+            window.addEventListener('resize', function () {
+                if (!isMobile()) return;
+                const newHeight = window.innerHeight;
+                const diff = lastViewportHeight - newHeight;
+                // Virtual keyboard detected (significant height drop)
+                if (diff > 150 && chatOpen) {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+                lastViewportHeight = newHeight;
+            });
+
+            // --- Pull-to-refresh (mobile main content) ---
+            const pullIndicator = document.getElementById('pullIndicator');
+            let pullStartY = 0;
+            let pullActive = false;
+
+            mainContainer.addEventListener('touchstart', function (e) {
+                if (!isMobile() || chatOpen) return;
+                // Only trigger pull from top of page
+                if (window.scrollY <= 0) {
+                    pullStartY = e.touches[0].clientY;
+                    pullActive = true;
+                }
+            }, { passive: true });
+
+            mainContainer.addEventListener('touchmove', function (e) {
+                if (!pullActive || !isMobile()) return;
+                const deltaY = e.touches[0].clientY - pullStartY;
+                if (deltaY > 80) {
+                    pullIndicator.classList.add('visible');
+                }
+            }, { passive: true });
+
+            mainContainer.addEventListener('touchend', function (e) {
+                if (!pullActive || !isMobile()) return;
+                pullActive = false;
+                const deltaY = (e.changedTouches[0] || {}).clientY - pullStartY;
+                if (deltaY > 80) {
+                    pullIndicator.textContent = 'Refreshing...';
+                    // Reload project list from backend if available
+                    setTimeout(function () {
+                        location.reload();
+                    }, 600);
+                }
+                pullIndicator.classList.remove('visible');
+                pullIndicator.textContent = 'Refresh...';
+            }, { passive: true });
 
             // Project card selection
             document.querySelectorAll('.project-card').forEach(function (card) {
