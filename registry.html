@@ -579,11 +579,20 @@
 
         /* ---- Mobile ---- */
         @media (max-width: 640px) {
-            header { min-height: 90px; }
+            /* Safe area insets for notched phones */
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            header {
+                min-height: 90px;
+                padding-top: env(safe-area-inset-top);
+            }
             .logo { width: 160px; }
             .header-title { font-size: var(--font-size-lg); }
+            .section-title { font-size: var(--font-size-md); }
             .container {
-                padding: var(--spacing-xl) var(--spacing-md) var(--spacing-lg);
+                padding: var(--spacing-xl) var(--spacing-md) calc(var(--spacing-lg) + env(safe-area-inset-bottom));
             }
 
             /* Bottom sheet chat panel */
@@ -663,6 +672,23 @@
             .pull-indicator.visible {
                 display: block;
                 opacity: 1;
+            }
+
+            /* Project cards — touch-friendly on mobile */
+            .project-card {
+                min-height: 48px;
+                padding: var(--spacing-md);
+            }
+
+            /* Footer — compact on mobile */
+            footer {
+                padding: var(--spacing-md) var(--spacing-lg);
+                font-size: var(--font-size-xs);
+            }
+
+            /* Chat panel — respect bottom safe area */
+            .chat-panel {
+                padding-bottom: env(safe-area-inset-bottom);
             }
         }
     </style>
